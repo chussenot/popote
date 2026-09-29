@@ -1,0 +1,21 @@
+[package]
+name = "popote"
+# Bumped by `cog bump` (see cog.toml); the release workflow refuses a tag that
+# does not match this line.
+version = "0.1.0"
+description = "Scale recipe quantities between serving counts."
+readme = "README.md"
+keywords = ["recipe", "cooking", "scaling", "servings"]
+categories = ["mathematics"]
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+# Ship the source, the README and the license; nothing else.
+include = ["src/**/*.rs", "README.md", "LICENSE"]
+
+[lints]
+workspace = true
+
+[dependencies]

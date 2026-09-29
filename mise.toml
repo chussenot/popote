@@ -6,6 +6,9 @@
 # a CI runner and a cloud agent session all resolve the same binaries.
 
 [tools]
+# Rust for the crates under crates/. Pinned so local, CI and release builds
+# agree; bump deliberately together with rust-version in Cargo.toml.
+rust = { version = "1.94.1", components = "rustfmt,clippy" }
 # Scripts in this repo are POSIX sh or Python; nothing else.
 python = "3.13"
 uv = "latest"
@@ -64,6 +67,27 @@ run = "scripts/setup-hooks.sh"
 # Quality gates (what CI runs)
 # ---------------------------------------------------------------------------
 
+[tasks."rust:fmt"]
+description = "Fail if any Rust source is unformatted"
+run = "cargo fmt --all --check"
+
+[tasks."rust:lint"]
+description = "Clippy on every target, pedantic set, warnings are errors"
+run = "cargo clippy --workspace --all-targets --locked -- -D warnings"
+
+[tasks."rust:test"]
+description = "Unit and doc tests"
+run = "cargo test --workspace --locked"
+
+[tasks."rust:doc"]
+description = "Build the API docs; broken intra-doc links are errors"
+env = { RUSTDOCFLAGS = "-D warnings" }
+run = "cargo doc --workspace --no-deps --locked"
+
+[tasks."rust:package"]
+description = "Build the crate exactly as it would be published, without uploading"
+run = "cargo publish --dry-run --locked -p popote"
+
 [tasks."lint:sh"]
 description = "shellcheck every POSIX script (scripts/ and .claude/hooks/)"
 run = "shellcheck --shell=sh scripts/*.sh .claude/hooks/*.sh"
@@ -90,7 +114,7 @@ run = "cog check --from-latest-tag || cog check"
 
 [tasks.check]
 description = "All quality gates, in CI order"
-depends = ["lint:sh", "lint:py", "docs:check"]
+depends = ["lint:sh", "lint:py", "docs:check", "rust:fmt", "rust:lint", "rust:test", "rust:doc"]
 
 [tasks.precommit]
 description = "Run every pre-commit hook against the whole tree"
