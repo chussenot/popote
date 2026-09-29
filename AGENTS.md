@@ -49,6 +49,7 @@ and `-i` works the same.
 
 | Path | What it holds |
 | --- | --- |
+| `crates/` | Rust crates of the Cargo workspace (`Cargo.toml` at the root); `crates/popote` is published to crates.io |
 | `docs/` | Project documentation; start at `docs/index.md` |
 | `docs/llms.txt` | Generated page index for agents; never edit by hand |
 | `scripts/` | POSIX and Python scripts behind the `mise` tasks |

@@ -44,6 +44,9 @@ if at 'git[[:space:]]+(add|commit)[^;&|]*(^|[[:space:]])\.env(\.[A-Za-z0-9_-]+)?
    && ! at 'git[[:space:]]+(add|commit)[^;&|]*\.env\.example([[:space:]]|$)'; then
   deny ".env holds secrets and is gitignored; document variables in .env.example instead."
 fi
+if at 'cargo[[:space:]]+publish([[:space:]]|$)' && ! at 'cargo[[:space:]]+publish[^;&|]*--dry-run'; then
+  deny "Agents never publish crates: releases go out from the release workflow on a v* tag (mise run release), and the one-time first publish is done by a human. Use cargo publish --dry-run to check a package."
+fi
 if at 'git[[:space:]]+commit[^;&|]*--no-verify'; then
   deny "Commit hooks enforce Conventional Commits and the docs gate; fix the finding instead of skipping them."
 fi

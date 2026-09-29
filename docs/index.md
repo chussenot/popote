@@ -23,6 +23,8 @@ Agents read the same list, generated from frontmatter, in [llms.txt](llms.txt).
 
 - [Add an agent to the harness](how-to/add-an-agent.md): write a new Claude
   Code subagent that follows the repository's conventions.
+- [Release the crate](how-to/release-the-crate.md): publish a new version of
+  `popote` to crates.io, including the one-time first publish.
 
 ## Look up
 

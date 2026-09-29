@@ -5,7 +5,7 @@ type: reference
 status: current
 audience: contributors
 last_reviewed: 2026-09-29
-tags: [mise, tooling, reference, codegraph]
+tags: [mise, tooling, reference, codegraph, rust]
 ---
 
 # Toolchain reference
@@ -17,6 +17,7 @@ Why there is one entry point: [decision 0001](../decisions/0001-mise-is-the-sing
 
 | Tool | mise backend | Purpose |
 | --- | --- | --- |
+| Rust 1.94.1 with rustfmt and clippy | `rust` | Builds, lints, tests and packages the crates under `crates/`; must satisfy `rust-version` in `Cargo.toml` (1.94) |
 | Python 3.13 | `python` | Runs the Python scripts in `scripts/` and the hooks' JSON parsing |
 | uv | `uv` | Python package manager, for when a script outgrows the standard library |
 | ruff | `ruff` | Python lint and format, configured in `ruff.toml` |
@@ -37,7 +38,7 @@ Why there is one entry point: [decision 0001](../decisions/0001-mise-is-the-sing
 | Node.js LTS | `node` | Runtime for codegraph and the ponytail plugin hooks; not used for repository scripts |
 | codegraph (pinned) | `npm:@colbymchenry/codegraph` | Local code knowledge graph served to agents over MCP; index in `.codegraph/` |
 
-Versions are `latest` except Python, Node.js (current LTS) and codegraph. codegraph is pinned because an upgrade can rewrite the agent configuration it generated ([harness reference](harness.md#edits-made-after-the-installer)), and because 1.6.0's prompt hook injected several KB of source into every task notification; 1.6.1 fixed that. `mise install` records nothing in the
+Versions are `latest` except Rust, Python, Node.js (current LTS) and codegraph. Rust is pinned so local, CI and release builds use the same compiler; bump it together with `rust-version` in `Cargo.toml`. codegraph is pinned because an upgrade can rewrite the agent configuration it generated ([harness reference](harness.md#edits-made-after-the-installer)), and because 1.6.0's prompt hook injected several KB of source into every task notification; 1.6.1 fixed that. `mise install` records nothing in the
 repository, so two machines can resolve different versions after a release.
 Pin a version in `mise.toml` when a tool upgrade breaks the gate.
 
@@ -63,15 +64,20 @@ Run a task with `mise run <task>`; `mise tasks` lists them.
 | Task | Runs | Use it to |
 | --- | --- | --- |
 | `setup` | `scripts/setup-hooks.sh` | Install the git hooks once per clone |
-| `check` | `lint:sh`, `lint:py`, `docs:check` | Run the full quality gate (what CI and pre-push run) |
+| `check` | `lint:sh`, `lint:py`, `docs:check`, `rust:fmt`, `rust:lint`, `rust:test`, `rust:doc` | Run the full quality gate (what CI and pre-push run) |
 | `lint:sh` | `shellcheck --shell=sh scripts/*.sh .claude/hooks/*.sh` | Lint every POSIX script |
 | `lint:py` | `ruff check .` and `ruff format --check .` | Lint and format-check every Python script |
 | `docs:check` | `python3 scripts/docs.py check` and `llms --check` | Validate frontmatter, titles, links; confirm `docs/llms.txt` is current |
 | `docs:llms` | `python3 scripts/docs.py llms` | Regenerate `docs/llms.txt` |
+| `rust:fmt` | `cargo fmt --all --check` | Fail on unformatted Rust source |
+| `rust:lint` | `cargo clippy --workspace --all-targets --locked -- -D warnings` | Lint every target with the pedantic set; warnings are errors |
+| `rust:test` | `cargo test --workspace --locked` | Run unit tests and doctests, including the crate README example |
+| `rust:doc` | `cargo doc --workspace --no-deps --locked` with `RUSTDOCFLAGS=-D warnings` | Build the API docs; a broken intra-doc link fails |
+| `rust:package` | `cargo publish --dry-run --locked -p popote` | Build the crate exactly as crates.io would receive it, without uploading; CI runs it after `check` |
 | `commits:check` | `cog check` | Confirm every commit follows Conventional Commits |
 | `precommit` | `prek run --all-files` | Run every pre-commit hook against the whole tree |
 | `changelog` | `cog changelog` | Print the changelog since the last tag |
-| `release` | `cog bump --auto` | Bump the version from commit history, tag, update `CHANGELOG.md` |
+| `release` | `cog bump --auto --annotated 'popote {{version}}'` | Bump the version from commit history, set it in the crate, update `CHANGELOG.md`, commit, and create an annotated `v*` tag that `git push --follow-tags` sends; see [Release the crate](../how-to/release-the-crate.md) |
 | `graph` | `codegraph init --yes`, or `codegraph sync` when an index exists | Build or refresh the local code index |
 | `rtk:trust` | `rtk trust` | Review and trust `.rtk/filters.toml` on this machine |
 | `rtk:verify` | `rtk verify` | Run the inline tests of the rtk filters |

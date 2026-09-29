@@ -1,0 +1,19 @@
+# Cargo workspace. Crates live under crates/; the repository root holds the
+# harness (docs, scripts, agent config), which must never ship in a package.
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.94"
+license = "MIT"
+repository = "https://github.com/chussenot/popote"
+authors = ["Clement Hussenot"]
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }

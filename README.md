@@ -10,10 +10,15 @@ tags: [overview]
 
 # popote
 
-popote is at its starting point: the repository holds the toolchain and the
-agent harness, not product code yet. The harness exists so that several coding
-agents and humans can work in one checkout from the first commit, with the same
-tools, the same rules and a documentation gate that keeps the docs honest.
+popote is a Rust library that scales recipe quantities between serving
+counts: `popote::scale(300.0, 4, 6)` returns `Ok(450.0)`. The crate lives in
+`crates/popote`, has no dependencies, and is released to crates.io from this
+repository; its crates.io page is [`crates/popote/README.md`](crates/popote/README.md).
+
+The rest of the repository is the toolchain and the agent harness. The harness
+exists so that several coding agents and humans can work in one checkout, with
+the same tools, the same rules and a documentation gate that keeps the docs
+honest.
 
 ## Quick start
 
@@ -36,6 +41,7 @@ The full walkthrough is [Getting started](docs/getting-started.md).
 | [Toolchain reference](docs/reference/toolchain.md) | Which tools are pinned and which `mise` tasks exist |
 | [Command-line tools for agents](docs/reference/cli-tools.md) | Which search tools agents use, and how fast they are |
 | [Harness reference](docs/reference/harness.md) | Every hook, agent, permission and managed block, and what triggers it |
+| [Release the crate](docs/how-to/release-the-crate.md) | How to publish a new version to crates.io, and the one-time first publish |
 | [Documentation style guide](docs/contributing/documentation-style.md) | How pages are written and the frontmatter contract |
 | [Decision records](docs/decisions/README.md) | The choices made so far, and why |
 

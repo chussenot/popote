@@ -11,7 +11,16 @@ branch_whitelist = []
 pre = "alpha.*"
 skip_ci = "[skip ci]"
 skip_untracked = false
-pre_bump_hooks = []
+tag_prefix = "v"
+# The tag is what triggers .github/workflows/release.yml, which refuses to
+# publish unless the tag matches the crate version. Keep them in step here:
+# rewrite the package version, refresh Cargo.lock, and prove the crate still
+# packages before cog commits and tags.
+pre_bump_hooks = [
+  "python3 scripts/set-crate-version.py crates/popote/Cargo.toml {{version}}",
+  "cargo check --workspace --quiet",
+  "cargo publish --dry-run --allow-dirty --quiet -p popote",
+]
 post_bump_hooks = []
 pre_package_bump_hooks = []
 post_package_bump_hooks = []
