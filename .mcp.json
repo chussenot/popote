@@ -2,8 +2,9 @@
   "mcpServers": {
     "codegraph": {
       "type": "stdio",
-      "command": "codegraph",
+      "command": "sh",
       "args": [
+        "${CLAUDE_PROJECT_DIR:-.}/scripts/codegraph.sh",
         "serve",
         "--mcp"
       ],

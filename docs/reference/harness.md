@@ -40,7 +40,7 @@ part exists is in [The agent harness](../agent-harness.md).
 | `SessionStart` | all | `bd prime --hook-json` | Loads the beads workflow and ready work into context |
 | `PreToolUse` | `Bash` | `.claude/hooks/guard-bash.sh` | Denies the commands listed below, with the reason |
 | `PreToolUse` | `Bash` | `.claude/hooks/rtk-rewrite.sh` | Passes the command to `rtk hook claude`, which prefixes supported commands with `rtk`. rtk pre-approves only read-only rewrites (`git status`); anything else (`git push --force`, compound commands) still goes through the permission rules. No-op without rtk |
-| `UserPromptSubmit` | all | `codegraph prompt-hook` (guarded) | For a structural prompt ("how does X reach Y", a known symbol name), injects `codegraph_explore` output into context. Silent for other prompts, without an index, or when codegraph is not installed. Disable per user with `CODEGRAPH_NO_PROMPT_HOOK=1` |
+| `UserPromptSubmit` | all | `scripts/codegraph.sh prompt-hook` | For a structural prompt ("how does X reach Y", a known symbol name), injects `codegraph_explore` output into context. Silent for other prompts, without an index, or when codegraph is not installed; never installs anything. Disable per user with `CODEGRAPH_NO_PROMPT_HOOK=1` |
 | `PostToolUse` | `Edit\|Write` | `.claude/hooks/docs-on-edit.sh` | On `README.md` or `docs/**/*.md`: runs `docs.py check` on the page (exit 2 with findings on failure, which Claude Code shows to the agent), then regenerates `docs/llms.txt` |
 
 ### Commands the Bash guard denies
@@ -68,14 +68,46 @@ To add one, follow [Add an agent to the harness](../how-to/add-an-agent.md).
 
 | Server | Config | Tools exposed | Notes |
 | --- | --- | --- | --- |
-| `codegraph` | `.mcp.json`, `.cursor/mcp.json`, `.codex/config.toml` | `codegraph_explore` | Runs `codegraph serve --mcp`, which watches the checkout and re-syncs the index about two seconds after a file changes. `alwaysLoad` keeps the tool out of Claude Code's deferred tool search. With no `.codegraph/` index it answers with guidance to use the built-in tools |
+| `codegraph` | `.mcp.json`, `.cursor/mcp.json`, `.codex/config.toml` | `codegraph_explore` | Claude Code starts it through `scripts/codegraph.sh serve --mcp` (see below); Codex and Cursor call `codegraph serve --mcp` directly. The server watches the checkout and re-syncs the index about two seconds after a file changes. `alwaysLoad` keeps the tool out of Claude Code's deferred tool search. With no `.codegraph/` index it answers with guidance to use the built-in tools |
+
+### Why Claude Code goes through `scripts/codegraph.sh`
+
+Claude Code starts MCP servers and hooks with the environment it was launched
+with. The session-start hook's `CLAUDE_ENV_FILE` only reaches Bash commands,
+so in a cloud session `codegraph` was not on the server's `PATH` and the
+server failed to connect. Without mise, the server also missed the `[env]` of
+`mise.toml`, so `CODEGRAPH_TELEMETRY=0` did not apply to it.
+
+`scripts/codegraph.sh` runs `mise exec npm:@colbymchenry/codegraph --
+codegraph …` from the repository root, which fixes both. It finds mise on
+`PATH` or in `~/.local/bin`, falls back to a `codegraph` already on `PATH`,
+and exits 127 when neither exists. The MCP server may install codegraph on
+first use; the prompt hook never installs anything, so a prompt is never held
+up by a download. `.mcp.json` points at the script as
+`${CLAUDE_PROJECT_DIR:-.}/scripts/codegraph.sh`, which Claude Code expands.
+
+In a brand-new container the server can start before the session-start
+hook has installed mise. It then fails once; reconnect it with `/mcp` after
+the hook finishes. Installing mise in the environment's setup script removes
+that race.
+
+### Edits made after the installer
 
 `codegraph install --target=claude,codex,cursor --location=local` generated
-these files. Two edits were made afterwards: the Cursor entry uses
-`${workspaceFolder}` instead of the installer's absolute path, so it works in
-any clone, and the installer's `.claude/CLAUDE.md` was deleted because it
-repeated the CodeGraph block already in `AGENTS.md`. Re-running the
-installer or `codegraph upgrade` can undo both; check `git diff` afterwards.
+these files. Four edits were made afterwards:
+
+- The Claude Code server and prompt hook call `scripts/codegraph.sh`. The
+  hook command ends with the comment `# runs: codegraph prompt-hook`, the
+  text the installer looks for, so `codegraph install --refresh` does not
+  add a second hook.
+- `.mcp.json` sets `alwaysLoad`.
+- The Cursor entry uses `${workspaceFolder}` instead of the installer's
+  absolute path, so it works in any clone.
+- The installer's `.claude/CLAUDE.md` was deleted because it repeated the
+  CodeGraph block already in `AGENTS.md`.
+
+Re-running the installer or `codegraph upgrade` can undo these; check
+`git diff` afterwards.
 
 ## Plugins
 

@@ -82,7 +82,9 @@ Run a task with `mise run <task>`; `mise tasks` lists them.
 ## Environment
 
 `mise.toml` sets `CODEGRAPH_TELEMETRY=0`, so codegraph sends no usage
-statistics from this repository. To opt in, set it to `1` in
+statistics from this repository. The setting reaches every codegraph
+process: shells get it from mise, and the MCP server and prompt hook get it
+through `scripts/codegraph.sh`. To opt in, set it to `1` in
 `mise.local.toml`. What it would send is listed in the upstream
 [TELEMETRY.md](https://github.com/colbymchenry/codegraph/blob/main/TELEMETRY.md).
 

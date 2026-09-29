@@ -102,7 +102,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if command -v codegraph >/dev/null 2>&1; then codegraph prompt-hook; fi",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/codegraph.sh\" prompt-hook 2>/dev/null || true # runs: codegraph prompt-hook",
             "timeout": 15
           }
         ]
