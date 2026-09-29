@@ -89,8 +89,10 @@ mise run check
 ```
 
 This is the same gate CI runs: shellcheck on every POSIX script, ruff on every
-Python script, and the documentation check (frontmatter, titles, links and a
-current `docs/llms.txt`). It ends with `docs ok` and `llms.txt ok`.
+Python script, the documentation check (frontmatter, titles, links and a
+current `docs/llms.txt`), and rustfmt, clippy, tests and API docs for the
+crate. The tasks run in parallel; the run passes when it ends with
+`Finished in` and no task reports an error.
 
 ## 5. Build the code index
 

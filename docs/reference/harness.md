@@ -5,7 +5,7 @@ type: reference
 status: current
 audience: contributors
 last_reviewed: 2026-09-29
-tags: [harness, claude-code, hooks, mcp, reference]
+tags: [harness, claude-code, hooks, mcp, reference, ci]
 ---
 
 # Harness reference
@@ -31,6 +31,8 @@ part exists is in [The agent harness](../agent-harness.md).
 | `.codex/config.toml` | Codex | Codex hooks switch and the `codegraph` MCP server |
 | `.codegraph/` | codegraph | Local index (SQLite); gitignored, built by `mise run graph` |
 | `docs/llms.txt` | Agents | Generated page index; never edit |
+| `.github/workflows/ci.yml` | GitHub Actions | On pull requests and pushes to `main`: `mise run check`, `mise run rust:package`, and `cog check` over the change |
+| `.github/workflows/release.yml` | GitHub Actions | On a `v*` tag: checks the tag against the crate version, runs the gate, publishes to crates.io with trusted publishing, creates the GitHub Release; see [Release the crate](../how-to/release-the-crate.md) |
 
 ## Claude Code hooks
 
@@ -40,7 +42,7 @@ part exists is in [The agent harness](../agent-harness.md).
 | `SessionStart` | all | `bd prime --hook-json` | Loads the beads workflow and ready work into context |
 | `PreToolUse` | `Bash` | `.claude/hooks/guard-bash.sh` | Denies the commands listed below, with the reason |
 | `PreToolUse` | `Bash` | `.claude/hooks/rtk-rewrite.sh` | Passes the command to `rtk hook claude`, which prefixes supported commands with `rtk`. rtk pre-approves only read-only rewrites (`git status`); anything else (`git push --force`, compound commands) still goes through the permission rules. No-op without rtk |
-| `UserPromptSubmit` | all | `scripts/codegraph.sh prompt-hook` | For a structural prompt ("how does X reach Y", a known symbol name), injects `codegraph_explore` output into context. Silent for other prompts, without an index, or when codegraph is not installed; never installs anything. Disable per user with `CODEGRAPH_NO_PROMPT_HOOK=1` |
+| `UserPromptSubmit` | all | `scripts/codegraph.sh prompt-hook` | For a structural prompt ("how does X reach Y", a known symbol name), injects `codegraph_explore` output into context. Silent for other prompts, for harness-written turns such as subagent reports and notifications ([why](#why-claude-code-goes-through-scriptscodegraphsh)), without an index, or when codegraph is not installed; never installs anything. Disable per user with `CODEGRAPH_NO_PROMPT_HOOK=1` |
 | `PostToolUse` | `Edit\|Write` | `.claude/hooks/docs-on-edit.sh` | On `README.md` or `docs/**/*.md`: runs `docs.py check` on the page (exit 2 with findings on failure, which Claude Code shows to the agent), then regenerates `docs/llms.txt` |
 
 ### Commands the Bash guard denies
@@ -52,6 +54,7 @@ part exists is in [The agent harness](../agent-harness.md).
 | `bd edit` | Opens an editor and hangs |
 | `git add`/`git commit` of `.env` or `.env.*` (not `.env.example`) | Secrets stay local |
 | `git commit --no-verify` | Hooks enforce commit format and the docs gate |
+| `cargo publish` without `--dry-run` | Releases go out from the release workflow on a `v*` tag; the one-time first publish is done by a human ([decision 0005](../decisions/0005-crates-publish-from-ci-with-trusted-publishing.md)) |
 
 Matching applies at command positions only, after here-doc bodies are
 removed, so text that mentions a command is not blocked.
@@ -85,6 +88,12 @@ and exits 127 when neither exists. The MCP server may install codegraph on
 first use; the prompt hook never installs anything, so a prompt is never held
 up by a download. `.mcp.json` points at the script as
 `${CLAUDE_PROJECT_DIR:-.}/scripts/codegraph.sh`, which Claude Code expands.
+
+The script also drops prompts the harness writes before codegraph sees them:
+any prompt containing `<agent-message`, `[Subagent hand-back]`,
+`<task-notification>` or `[SYSTEM NOTIFICATION` exits without output.
+codegraph 1.6.1 skips only a bare task notification, and on a subagent report
+it injected about 5 KB of unrelated source into context.
 
 In a brand-new container the server can start before the session-start
 hook has installed mise. It then fails once; reconnect it with `/mcp` after
@@ -135,7 +144,7 @@ block ahead of the beads-managed section in each hook, so prek runs first.
 
 | Git hook | Runs |
 | --- | --- |
-| `pre-commit` | File hygiene, shellcheck, ruff, `docs.py check`, `docs.py llms --check`, `.env` refusal; then beads |
+| `pre-commit` | File hygiene, shellcheck, ruff, `cargo fmt --all --check` and `cargo clippy` (on Rust changes), `docs.py check`, `docs.py llms --check`, `.env` refusal; then beads |
 | `commit-msg` | `cog verify --file` (Conventional Commits) |
 | `pre-push` | `mise run check`; then beads |
 
