@@ -5,7 +5,7 @@ type: explanation
 status: current
 audience: everyone
 last_reviewed: 2026-09-29
-tags: [harness, agents, architecture]
+tags: [harness, agents, architecture, codegraph]
 ---
 
 # The agent harness
@@ -25,6 +25,7 @@ and what that part costs.
 flowchart LR
     S[Session starts] --> H1[session-start hook<br/>mise install]
     H1 --> H2[bd prime<br/>backlog in context]
+    W -->|code question| CG[codegraph_explore<br/>local index]
     H2 --> W{Agent works}
     W -->|Bash| G[guard-bash<br/>deny list] --> R[rtk<br/>condensed output]
     W -->|Edit docs/| D[docs-on-edit<br/>check + llms.txt]
@@ -85,6 +86,27 @@ is the pact block in `AGENTS.md`.
 
 **Cost.** Leases are advisory. An agent that ignores the protocol is not
 stopped, only visible in `pact log` and `pact audit`.
+
+## Code structure without a file crawl
+
+**Failure.** To answer "how does a request reach the database?", an agent
+greps, globs and reads file after file, rebuilding call paths by hand. It
+spends most of its tool calls on discovery and still misses hops grep cannot
+follow, such as callbacks and interface dispatch.
+
+**Part.** codegraph keeps a local index of every symbol, call edge and import
+in `.codegraph/`. Agents query it through one MCP tool, `codegraph_explore`,
+which returns the relevant source, the call paths between symbols and the
+blast radius of a change in one call. The server re-syncs the index as files
+change, and a prompt hook adds the same context to structural questions
+before the agent starts. The index stays on the machine.
+Decision: [0004](decisions/0004-agents-query-a-local-code-graph.md).
+
+**Cost.** Answers take fewer calls but stay in the context window: upstream
+measured about 80% more retrieval context still resident at the end of long
+sessions. Node.js joins the toolchain as a runtime. Each machine builds its
+own index (`mise run graph`); the cloud session-start hook does it
+automatically.
 
 ## Guard rails on commands
 

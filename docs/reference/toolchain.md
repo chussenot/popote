@@ -5,7 +5,7 @@ type: reference
 status: current
 audience: contributors
 last_reviewed: 2026-09-29
-tags: [mise, tooling, reference]
+tags: [mise, tooling, reference, codegraph]
 ---
 
 # Toolchain reference
@@ -26,8 +26,10 @@ Why there is one entry point: [decision 0001](../decisions/0001-mise-is-the-sing
 | beads (`bd`) | `github:gastownhall/beads` | Issue tracker shared by agents and humans; state in `.beads/` |
 | pact | `github:chussenot/pact` | Leases, messages and watches between agents in one checkout; state in `.pact/` |
 | rtk | `rtk` | Condenses command output before it reaches an agent |
+| Node.js LTS | `node` | Runtime for codegraph and the ponytail plugin hooks; not used for repository scripts |
+| codegraph | `npm:@colbymchenry/codegraph` | Local code knowledge graph served to agents over MCP; index in `.codegraph/` |
 
-Versions are `latest` except Python. `mise install` records nothing in the
+Versions are `latest` except Python and Node.js (current LTS). `mise install` records nothing in the
 repository, so two machines can resolve different versions after a release.
 Pin a version in `mise.toml` when a tool upgrade breaks the gate.
 
@@ -60,10 +62,16 @@ Run a task with `mise run <task>`; `mise tasks` lists them.
 | `precommit` | `prek run --all-files` | Run every pre-commit hook against the whole tree |
 | `changelog` | `cog changelog` | Print the changelog since the last tag |
 | `release` | `cog bump --auto` | Bump the version from commit history, tag, update `CHANGELOG.md` |
+| `graph` | `codegraph init --yes`, or `codegraph sync` when an index exists | Build or refresh the local code index |
 | `bd:ready` | `bd ready` | List issues with no open blockers |
 | `pact:doctor` | `pact doctor` | Check the coordination protocol is current and committed |
 
 ## Environment
+
+`mise.toml` sets `CODEGRAPH_TELEMETRY=0`, so codegraph sends no usage
+statistics from this repository. To opt in, set it to `1` in
+`mise.local.toml`. What it would send is listed in the upstream
+[TELEMETRY.md](https://github.com/colbymchenry/codegraph/blob/main/TELEMETRY.md).
 
 mise loads `.env` from the repository root when it exists. `.env` is
 gitignored and the Bash guard refuses to commit it. Personal overrides

@@ -12,7 +12,7 @@ Paths are relative to this file. Deprecated pages are omitted.
 
 ## Tutorials
 
-- [Getting started](getting-started.md): Go from a fresh clone of popote to a green quality gate, working git hooks and a first tracked issue.
+- [Getting started](getting-started.md): Go from a fresh clone of popote to a green quality gate, working git hooks, a code index and a first tracked issue.
 
 ## How-to guides
 
@@ -33,4 +33,5 @@ Paths are relative to this file. Deprecated pages are omitted.
 - [mise is the single toolchain entry point](decisions/0001-mise-is-the-single-toolchain-entry-point.md): Why every tool and task in popote is declared in mise.toml, and what that costs.
 - [Documentation is Markdown with a frontmatter contract](decisions/0002-documentation-is-markdown-with-a-frontmatter-contract.md): Why popote documentation is Markdown in the repository with validated frontmatter and a generated llms.txt.
 - [Scripts are POSIX sh or Python](decisions/0003-scripts-are-posix-sh-or-python.md): Why every script and hook in popote is POSIX sh or standard-library Python, and when that rule would change.
+- [Agents query a local code graph](decisions/0004-agents-query-a-local-code-graph.md): Why popote agents answer code questions through codegraph over MCP, and what that costs in context, runtime and privacy.
 - [Decision record template](decisions/template.md): The sections every popote decision record contains, with guidance for each.

@@ -19,6 +19,7 @@ link here instead of repeating the argument.
 | 0001 | [mise is the single toolchain entry point](0001-mise-is-the-single-toolchain-entry-point.md) | accepted |
 | 0002 | [Documentation is Markdown with a frontmatter contract](0002-documentation-is-markdown-with-a-frontmatter-contract.md) | accepted |
 | 0003 | [Scripts are POSIX sh or Python](0003-scripts-are-posix-sh-or-python.md) | accepted |
+| 0004 | [Agents query a local code graph](0004-agents-query-a-local-code-graph.md) | accepted |
 
 ## Recording a decision
 

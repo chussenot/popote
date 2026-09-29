@@ -1,11 +1,11 @@
 ---
 title: Getting started
-description: Go from a fresh clone of popote to a green quality gate, working git hooks and a first tracked issue.
+description: Go from a fresh clone of popote to a green quality gate, working git hooks, a code index and a first tracked issue.
 type: tutorial
 status: current
 audience: contributors
 last_reviewed: 2026-09-29
-tags: [onboarding, mise, beads, pact]
+tags: [onboarding, mise, beads, pact, codegraph]
 ---
 
 # Getting started
@@ -85,7 +85,26 @@ This is the same gate CI runs: shellcheck on every POSIX script, ruff on every
 Python script, and the documentation check (frontmatter, titles, links and a
 current `docs/llms.txt`). It ends with `docs ok` and `llms.txt ok`.
 
-## 5. Track your first issue
+## 5. Build the code index
+
+Agents answer questions about the code from a local graph instead of reading
+file after file. Build it once per clone:
+
+```sh
+mise run graph
+```
+
+It ends with `Indexed N files` and creates `.codegraph/`, which is
+gitignored. The `codegraph` MCP server keeps it current while you work, so
+you do not run this again unless you delete the directory. Try a query:
+
+```sh
+codegraph explore "cmd_check"
+```
+
+You get the source of the documentation checker and what calls it.
+
+## 6. Track your first issue
 
 Work is tracked in beads, not in Markdown TODO lists, so that agents and
 humans share one backlog.
@@ -99,7 +118,7 @@ bd ready
 `bd update <id> --claim`, where `<id>` is the `popote-…` identifier printed
 by `bd create`.
 
-## 6. Give yourself an identity for pact
+## 7. Give yourself an identity for pact
 
 When several agents share this checkout, pact leases stop them from editing
 the same file at once. It needs to know who you are:
