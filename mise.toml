@@ -129,8 +129,10 @@ description = "Print the changelog since the last tag (no files written)"
 run = "cog changelog"
 
 [tasks.release]
-description = "Bump the version from commit history, tag and update CHANGELOG.md"
-run = "cog bump --auto"
+description = "Bump the version from commit history, update CHANGELOG.md and create an annotated v* tag"
+# Annotated, because `git push --follow-tags` only pushes annotated tags and
+# the pushed tag is what starts .github/workflows/release.yml.
+run = "cog bump --auto --annotated 'popote {{version}}'"
 
 # ---------------------------------------------------------------------------
 # Planning and coordination
