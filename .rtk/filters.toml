@@ -1,13 +1,52 @@
-# Project-local RTK filters — commit this file with your repo.
-# Filters here override user-global and built-in filters.
-# Docs: https://github.com/rtk-ai/rtk#custom-filters
+# Project-local rtk filters, committed with the repo.
+# rtk applies them only after `rtk trust` on each machine (`mise run rtk:trust`);
+# trust is tied to this file's hash, so any edit needs a new trust.
+# Test with `mise run rtk:verify`. DSL: https://github.com/rtk-ai/rtk/blob/master/src/filters/README.md
+#
+# These cover the fast tools in mise.toml that rtk has no built-in filter for.
+# rg, ast-grep, jq, find, ls, tree, cat, wc and diff are handled by rtk itself.
 schema_version = 1
 
-# Example: suppress build noise from a custom tool
-# [filters.my-tool]
-# description = "Compact my-tool output"
-# match_command = "^my-tool\\s+build"
-# strip_ansi = true
-# strip_lines_matching = ["^\\s*$", "^Downloading", "^Installing"]
-# max_lines = 30
-# on_empty = "my-tool: ok"
+[filters.fd]
+description = "fd: cap long path lists"
+match_command = "^fd\\b"
+strip_ansi = true
+strip_lines_matching = ["^\\s*$"]
+truncate_lines_at = 200
+max_lines = 150
+
+[[tests.fd]]
+name = "short list passes through"
+input = "docs/index.md\ndocs/getting-started.md\n"
+expected = "docs/index.md\ndocs/getting-started.md"
+
+[filters.yq]
+description = "yq: same treatment as rtk's built-in jq filter"
+match_command = "^yq\\b"
+strip_ansi = true
+strip_lines_matching = ["^\\s*$"]
+truncate_lines_at = 160
+max_lines = 60
+
+[[tests.yq]]
+name = "short document passes through"
+input = "name: popote\ntools:\n  - rg\n"
+expected = "name: popote\ntools:\n  - rg"
+
+[filters.scc]
+description = "scc: drop the table rules and the cost estimate, keep the numbers"
+match_command = "^scc\\b"
+strip_ansi = true
+strip_lines_matching = [
+  "^[─━═\\-]+$",
+  "^\\s*$",
+  "^Estimated ",
+  "^Processed ",
+]
+truncate_lines_at = 160
+max_lines = 40
+
+[[tests.scc]]
+name = "rules and estimates removed"
+input = "───────────────\nLanguage  Files  Lines\n───────────────\nPython        1    310\n───────────────\nEstimated Cost to Develop (organic) $8,000\n"
+expected = "Language  Files  Lines\nPython        1    310"

@@ -23,6 +23,28 @@ only the text outside the markers.
 - **Non-interactive shells**: use `cp -f`, `mv -f`, `rm -f`; never open an
   editor (`bd edit`, `git rebase -i`). The Bash guard hook denies the worst cases.
 
+## Shell tools
+
+The toolchain ships fast single-purpose tools. Use them instead of the
+classic commands; rtk condenses their output either way. Details and
+measurements: [docs/reference/cli-tools.md](docs/reference/cli-tools.md).
+
+| Task | Use | Not | Why |
+| --- | --- | --- | --- |
+| How code fits together | `codegraph explore "<symbols>"` | reading file after file | One call returns source, callers and blast radius |
+| Search file contents | `rg <pattern>` | `grep -r` | 20x+ faster on real trees; respects `.gitignore`; `.ripgreprc` adds dot-dirs |
+| Search by syntax | `ast-grep -p '<pattern>' -l <lang>` | regex over code | Matches the syntax tree, not text |
+| Find files by name | `fd <regex>` (`fd -H` for dot-dirs) | `find` | Respects `.gitignore`, shorter syntax, parallel on big trees |
+| Query JSON | `jq` | `python -c`, grep | |
+| Query YAML, TOML, XML | `yq` (mikefarah v4) | sed, grep | Format follows the file extension: `yq .changelog.path cog.toml` |
+| Replace across files | `sd '<from>' '<to>' <files>` | `sed -i` | Same regex syntax as rg; no GNU/BSD `sed -i` split |
+| Size up code | `scc <dir>` | `wc -l` | Lines, code, comments and complexity per language |
+| Compare speed | `hyperfine '<a>' '<b>'` | `time` | Warm-up, repeated runs, statistics |
+
+ripgrep flags differ from grep: `-E` means `--encoding` (rg regex is already
+extended; drop the flag), `-r` means `--replace` (rg is recursive by default),
+and `-i` works the same.
+
 ## Where things are
 
 | Path | What it holds |

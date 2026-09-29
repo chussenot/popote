@@ -60,6 +60,12 @@ fi
 # Git hooks and the codegraph index are local state; a fresh clone has neither.
 eval "$(mise env --shell bash 2>/dev/null)" 2>/dev/null || true
 sh scripts/setup-hooks.sh >/dev/null 2>&1 || echo "popote: git hooks not installed; run 'mise run setup'."
+# Project rtk filters apply only once trusted on this machine. The container
+# is disposable and the filters are this repository's own, so trust them here;
+# on a workstation the developer reviews them once with `mise run rtk:trust`.
+if command -v rtk >/dev/null 2>&1; then
+  rtk trust --yes >/dev/null 2>&1 || echo "popote: rtk filters not trusted; run 'rtk trust'."
+fi
 if command -v codegraph >/dev/null 2>&1 && [ ! -f .codegraph/codegraph.db ]; then
   codegraph init --yes >/dev/null 2>&1 || echo "popote: codegraph index not built; run 'mise run graph'."
 fi

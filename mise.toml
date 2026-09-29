@@ -23,6 +23,17 @@ cocogitto = "latest"
 "github:chussenot/pact" = "latest"
 # rtk: compresses command output before it reaches the agent's context.
 rtk = "latest"
+# Fast command-line tools for agents (and humans). Each is the benchmark
+# leader in its niche, single-binary, and either rewritten by rtk or given a
+# project filter in .rtk/filters.toml. See docs/reference/cli-tools.md.
+ripgrep = "latest"      # rg: content search (rtk rg)
+fd = "latest"           # file search by name (rtk filter)
+ast-grep = "latest"     # structural code search and rewrite (rtk ast-grep)
+jq = "latest"           # JSON query (rtk jq)
+yq = "latest"           # YAML/TOML/XML query, mikefarah (rtk filter)
+sd = "latest"           # search and replace across files
+"aqua:boyter/scc" = "latest"  # code size and complexity survey (rtk filter)
+hyperfine = "latest"    # command benchmarking
 # Node.js is a tool runtime here, not a script language: the codegraph npm
 # package and the ponytail plugin hooks run on it. Scripts stay POSIX sh or Python.
 node = "lts"
@@ -35,6 +46,8 @@ _.file = ".env"
 # codegraph sends anonymous usage statistics unless told not to. Off by default
 # for everyone working in this repo; set it to 1 in mise.local.toml to opt in.
 CODEGRAPH_TELEMETRY = "0"
+# Repository defaults for ripgrep (hidden files, long-line previews).
+RIPGREP_CONFIG_PATH = "{{config_root}}/.ripgreprc"
 
 # ---------------------------------------------------------------------------
 # Setup
@@ -99,6 +112,18 @@ run = "cog bump --auto"
 [tasks.graph]
 description = "Build or refresh the local codegraph index agents query over MCP"
 run = "if [ -f .codegraph/codegraph.db ]; then codegraph sync; else codegraph init --yes; fi"
+
+[tasks."rtk:trust"]
+description = "Review and trust the project rtk filters in .rtk/filters.toml (needed once per machine, and after each change)"
+run = "rtk trust"
+
+[tasks."rtk:verify"]
+description = "Run the inline tests of the project rtk filters"
+run = "rtk verify"
+
+[tasks.bench]
+description = "Benchmark the agent search commands against their classic equivalents on this checkout"
+run = "sh scripts/bench-search.sh"
 
 [tasks."bd:ready"]
 description = "Issues ready to work on"

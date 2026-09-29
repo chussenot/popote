@@ -1,0 +1,12 @@
+# ripgrep defaults for this repository, loaded through RIPGREP_CONFIG_PATH
+# (set in mise.toml). One flag per line; see `rg --help`.
+#
+# Search dot-directories too: .claude/, .github/, .beads/ and .rtk/ hold real
+# configuration, and an agent that cannot find them assumes they do not exist.
+--hidden
+# ...but never git's object store.
+--glob=!.git/
+# Long lines (minified files, JSONL logs in .beads/ and .pact/) cost tokens
+# without helping; show a preview instead of the whole line.
+--max-columns=240
+--max-columns-preview
