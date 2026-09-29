@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "popote",
+  "project_id": "1643d96c-a34d-4fbe-83ab-9d77b065de12"
+}
