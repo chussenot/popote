@@ -79,6 +79,10 @@ Set `last_reviewed` to today on every page you change.
    for the pages you will write. Check `bd ready` for a matching issue and
    claim it.
 2. Read the code or config the change touches and any ADR it implements.
+   When `.codegraph/` exists, start with `codegraph explore "<symbols or
+   question>"` (or the `codegraph_explore` MCP tool): it returns the source,
+   callers and blast radius in one call, which is how you find every
+   behaviour a page must describe.
 3. Find every page that mentions the affected behaviour:
    `grep -rn '<term>' README.md docs/`. Stale mentions are part of the job.
 4. Write. Problem statement first, then mechanism, then trade-off. A new page

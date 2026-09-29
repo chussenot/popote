@@ -23,10 +23,18 @@ cocogitto = "latest"
 "github:chussenot/pact" = "latest"
 # rtk: compresses command output before it reaches the agent's context.
 rtk = "latest"
+# Node.js is a tool runtime here, not a script language: the codegraph npm
+# package and the ponytail plugin hooks run on it. Scripts stay POSIX sh or Python.
+node = "lts"
+# codegraph: a local code knowledge graph served to agents over MCP.
+"npm:@colbymchenry/codegraph" = "latest"
 
 [env]
 # Load local secrets when present; never committed (.env is gitignored).
 _.file = ".env"
+# codegraph sends anonymous usage statistics unless told not to. Off by default
+# for everyone working in this repo; set it to 1 in mise.local.toml to opt in.
+CODEGRAPH_TELEMETRY = "0"
 
 # ---------------------------------------------------------------------------
 # Setup
@@ -87,6 +95,10 @@ run = "cog bump --auto"
 # ---------------------------------------------------------------------------
 # Planning and coordination
 # ---------------------------------------------------------------------------
+
+[tasks.graph]
+description = "Build or refresh the local codegraph index agents query over MCP"
+run = "if [ -f .codegraph/codegraph.db ]; then codegraph sync; else codegraph init --yes; fi"
 
 [tasks."bd:ready"]
 description = "Issues ready to work on"

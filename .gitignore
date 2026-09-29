@@ -22,6 +22,11 @@
 .mise.local.toml
 mise.local.toml
 
+# codegraph index: a local SQLite database, rebuilt per machine with
+# `mise run graph`. The whole directory stays out of git: agents read the
+# presence of .codegraph/ as "this checkout is indexed".
+.codegraph/
+
 # Python
 __pycache__/
 *.pyc

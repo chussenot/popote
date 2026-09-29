@@ -15,6 +15,11 @@ keep current. Add here only what is specific to Claude Code.
     rtk compress command output.
   - `PostToolUse(Edit|Write)`: on a `docs/` page, checks its frontmatter and
     regenerates `docs/llms.txt`. A broken page is reported back to you.
+  - `UserPromptSubmit`: `codegraph prompt-hook` adds graph context to
+    structural questions ("how does X reach Y").
+- The `codegraph` MCP server (`.mcp.json`) answers code questions from a
+  local index; prefer `codegraph_explore` over grep-and-read loops. Build the
+  index with `mise run graph` if `.codegraph/` is missing.
 - The ponytail plugin is enabled for this project; trust the marketplace when
   Claude Code asks.
 
