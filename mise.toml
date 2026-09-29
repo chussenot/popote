@@ -1,0 +1,97 @@
+# mise-en-place: tools and tasks for this repository.
+# https://mise.jdx.dev — run `mise install` once, then `mise run setup`, then
+# `mise run <task>` (or `mise tasks` to list them).
+#
+# Every tool an agent or a contributor needs is pinned here, so a fresh clone,
+# a CI runner and a cloud agent session all resolve the same binaries.
+
+[tools]
+# Scripts in this repo are POSIX sh or Python; nothing else.
+python = "3.13"
+uv = "latest"
+ruff = "latest"
+shellcheck = "latest"
+# Git hooks runner (pre-commit compatible, no Python venv per hook).
+prek = "latest"
+# Conventional commits, changelog and version bumps.
+cocogitto = "latest"
+# bd (beads), the issue tracker agents plan in. From the GitHub release binary:
+# the npm package (@beads/bd) downloads a platform binary in a postinstall step,
+# which fails behind some proxies.
+"github:gastownhall/beads" = "latest"
+# pact: leases, messages and watches so several agents can share this checkout.
+"github:chussenot/pact" = "latest"
+# rtk: compresses command output before it reaches the agent's context.
+rtk = "latest"
+
+[env]
+# Load local secrets when present; never committed (.env is gitignored).
+_.file = ".env"
+
+# ---------------------------------------------------------------------------
+# Setup
+# ---------------------------------------------------------------------------
+
+[tasks.setup]
+description = "One-time developer setup: git hooks (prek chained before beads)"
+run = "scripts/setup-hooks.sh"
+
+# ---------------------------------------------------------------------------
+# Quality gates (what CI runs)
+# ---------------------------------------------------------------------------
+
+[tasks."lint:sh"]
+description = "shellcheck every POSIX script (scripts/ and .claude/hooks/)"
+run = "shellcheck --shell=sh scripts/*.sh .claude/hooks/*.sh"
+
+[tasks."lint:py"]
+description = "ruff lint and format check on every Python script"
+run = ["ruff check .", "ruff format --check ."]
+
+[tasks."docs:check"]
+description = "Frontmatter contract, one H1 per page, relative links and anchors resolve, docs/llms.txt is current"
+run = """
+set -eu
+python3 scripts/docs.py check
+python3 scripts/docs.py llms --check
+"""
+
+[tasks."docs:llms"]
+description = "Regenerate docs/llms.txt from page frontmatter"
+run = "python3 scripts/docs.py llms"
+
+[tasks."commits:check"]
+description = "Every commit on this branch follows Conventional Commits"
+run = "cog check --from-latest-tag || cog check"
+
+[tasks.check]
+description = "All quality gates, in CI order"
+depends = ["lint:sh", "lint:py", "docs:check"]
+
+[tasks.precommit]
+description = "Run every pre-commit hook against the whole tree"
+run = "prek run --all-files"
+
+# ---------------------------------------------------------------------------
+# Release
+# ---------------------------------------------------------------------------
+
+[tasks.changelog]
+description = "Print the changelog since the last tag (no files written)"
+run = "cog changelog"
+
+[tasks.release]
+description = "Bump the version from commit history, tag and update CHANGELOG.md"
+run = "cog bump --auto"
+
+# ---------------------------------------------------------------------------
+# Planning and coordination
+# ---------------------------------------------------------------------------
+
+[tasks."bd:ready"]
+description = "Issues ready to work on"
+run = "bd ready"
+
+[tasks."pact:doctor"]
+description = "Is the multi-agent protocol current, reachable and committed?"
+run = "pact doctor"

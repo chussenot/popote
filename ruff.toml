@@ -1,0 +1,6 @@
+# ruff: lint and format for the Python scripts in this repository.
+target-version = "py311"
+line-length = 120
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]

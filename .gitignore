@@ -5,3 +5,24 @@
 .beads-credential-key
 .beads/proxieddb/
 *.gate.lock*
+
+# Everything pact or an agent writes under .pact/ is local runtime state,
+# EXCEPT the files below, which are history or graph and belong in git.
+.pact/*
+!.pact/events.jsonl
+!.pact/messages.jsonl
+!.pact/plan.json
+
+# Local secrets (loaded by mise from .env; document variables in .env.example)
+.env
+.env.*
+!.env.example
+
+# mise
+.mise.local.toml
+mise.local.toml
+
+# Python
+__pycache__/
+*.pyc
+.ruff_cache/

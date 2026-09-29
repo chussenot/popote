@@ -1,0 +1,85 @@
+# Git hooks, run by prek (https://prek.j178.dev); the file is pre-commit compatible.
+# Install once with `mise run setup`. Run everything with `mise run precommit`.
+#
+# File-level checks run on every commit, the commit message is checked by
+# cocogitto, and the full gate runs on push. Beads adds its own chained hooks
+# via `bd hooks install`; they coexist (see scripts/setup-hooks.sh).
+
+minimum_pre_commit_version: "3.2.0"
+default_install_hook_types: [pre-commit, commit-msg, pre-push]
+default_stages: [pre-commit]
+# Beads-managed files are not ours to lint.
+exclude: ^\.beads/
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: check-executables-have-shebangs
+      - id: detect-private-key
+
+  - repo: local
+    hooks:
+      - id: shellcheck
+        name: shellcheck (POSIX sh)
+        entry: shellcheck --shell=sh
+        language: system
+        types: [shell]
+
+      - id: ruff-check
+        name: ruff check
+        entry: ruff check --force-exclude
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: ruff format --check
+        entry: ruff format --check --force-exclude
+        language: system
+        types: [python]
+
+      - id: docs-check
+        name: docs frontmatter, titles and links
+        entry: python3 scripts/docs.py check
+        language: system
+        files: ^(README\.md|docs/.*\.md)$
+        pass_filenames: false
+
+      - id: llms-txt
+        name: docs/llms.txt matches the frontmatter
+        entry: python3 scripts/docs.py llms --check
+        language: system
+        files: ^(README\.md|docs/.*\.md|docs/llms\.txt|scripts/docs\.py)$
+        pass_filenames: false
+
+      - id: no-dotenv
+        name: never commit .env files
+        entry: 'refusing to commit a .env file; keep secrets local (see .env.example)'
+        language: fail
+        files: ^\.env(\..*)?$
+        exclude: ^\.env\.example$
+
+      - id: conventional-commit
+        name: conventional commit message (cog verify)
+        entry: cog verify --file
+        language: system
+        stages: [commit-msg]
+
+      - id: mise-check
+        name: mise run check (pre-push)
+        entry: mise run check
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

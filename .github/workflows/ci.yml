@@ -1,0 +1,47 @@
+# CI runs the same gate as `mise run check` and the pre-push hook, plus the
+# commit-message check over the pull request's history.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Only the tools the gate needs are installed below; stop `mise run` from
+  # installing the rest of mise.toml on demand.
+  MISE_TASK_RUN_AUTO_INSTALL: "false"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+        with:
+          install_args: python ruff shellcheck
+      - run: mise run check
+
+  commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v2
+        with:
+          install_args: cocogitto
+      - name: Conventional Commits on this change
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            cog check "origin/${{ github.base_ref }}..HEAD"
+          else
+            cog check
+          fi
