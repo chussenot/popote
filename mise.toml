@@ -38,7 +38,10 @@ hyperfine = "latest"    # command benchmarking
 # package and the ponytail plugin hooks run on it. Scripts stay POSIX sh or Python.
 node = "lts"
 # codegraph: a local code knowledge graph served to agents over MCP.
-"npm:@colbymchenry/codegraph" = "latest"
+# Pinned, not latest: upgrades can rewrite the agent config it generated
+# (see docs/reference/harness.md), so they are deliberate. 1.6.1 is the first
+# release whose prompt hook skips task notifications (upstream #1832).
+"npm:@colbymchenry/codegraph" = "1.6.1"
 
 [env]
 # Load local secrets when present; never committed (.env is gitignored).

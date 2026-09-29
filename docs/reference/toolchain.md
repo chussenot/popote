@@ -35,9 +35,9 @@ Why there is one entry point: [decision 0001](../decisions/0001-mise-is-the-sing
 | scc | `aqua:boyter/scc` | Code size and complexity by language |
 | hyperfine | `hyperfine` | Command benchmarking |
 | Node.js LTS | `node` | Runtime for codegraph and the ponytail plugin hooks; not used for repository scripts |
-| codegraph | `npm:@colbymchenry/codegraph` | Local code knowledge graph served to agents over MCP; index in `.codegraph/` |
+| codegraph (pinned) | `npm:@colbymchenry/codegraph` | Local code knowledge graph served to agents over MCP; index in `.codegraph/` |
 
-Versions are `latest` except Python and Node.js (current LTS). `mise install` records nothing in the
+Versions are `latest` except Python, Node.js (current LTS) and codegraph. codegraph is pinned because an upgrade can rewrite the agent configuration it generated ([harness reference](harness.md#edits-made-after-the-installer)), and because 1.6.0's prompt hook injected several KB of source into every task notification; 1.6.1 fixed that. `mise install` records nothing in the
 repository, so two machines can resolve different versions after a release.
 Pin a version in `mise.toml` when a tool upgrade breaks the gate.
 
@@ -82,7 +82,9 @@ Run a task with `mise run <task>`; `mise tasks` lists them.
 ## Environment
 
 `mise.toml` sets `CODEGRAPH_TELEMETRY=0`, so codegraph sends no usage
-statistics from this repository. To opt in, set it to `1` in
+statistics from this repository. The setting reaches every codegraph
+process: shells get it from mise, and the MCP server and prompt hook get it
+through `scripts/codegraph.sh`. To opt in, set it to `1` in
 `mise.local.toml`. What it would send is listed in the upstream
 [TELEMETRY.md](https://github.com/colbymchenry/codegraph/blob/main/TELEMETRY.md).
 
