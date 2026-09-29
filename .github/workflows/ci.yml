@@ -26,8 +26,11 @@ jobs:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v5
         with:
-          install_args: python ruff shellcheck
+          install_args: python ruff shellcheck rust
       - run: mise run check
+      # Build the crate exactly as crates.io would receive it, so a release
+      # never discovers a packaging problem at publish time.
+      - run: mise run rust:package
 
   commits:
     runs-on: ubuntu-latest
