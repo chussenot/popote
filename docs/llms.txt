@@ -21,6 +21,7 @@ Paths are relative to this file. Deprecated pages are omitted.
 ## Reference
 
 - [Documentation style guide](contributing/documentation-style.md): How popote documentation is written and structured, and the frontmatter contract every page must meet.
+- [Command-line tools for agents](reference/cli-tools.md): The fast search and data tools in the toolchain, how rtk handles each, the repository defaults, and the benchmarks behind the choice.
 - [Harness reference](reference/harness.md): Every Claude Code hook, subagent, permission and tool-managed instruction block in popote, and what triggers each one.
 - [Toolchain reference](reference/toolchain.md): Every tool pinned in mise.toml, what it is for, and every mise task with the command it runs.
 

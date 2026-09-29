@@ -29,6 +29,8 @@ Agents read the same list, generated from frontmatter, in [llms.txt](llms.txt).
 - [Toolchain reference](reference/toolchain.md): pinned tools and `mise` tasks.
 - [Harness reference](reference/harness.md): hooks, agents, permissions and
   tool-managed instruction blocks.
+- [Command-line tools for agents](reference/cli-tools.md): the fast search
+  tools, their rtk handling and benchmarks.
 - [Documentation style guide](contributing/documentation-style.md): voice,
   structure and the frontmatter contract.
 

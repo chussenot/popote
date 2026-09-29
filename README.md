@@ -34,6 +34,7 @@ The full walkthrough is [Getting started](docs/getting-started.md).
 | [Getting started](docs/getting-started.md) | How to go from a clone to a green gate and a first issue |
 | [The agent harness](docs/agent-harness.md) | Why the repository is built around agents, and what each part prevents |
 | [Toolchain reference](docs/reference/toolchain.md) | Which tools are pinned and which `mise` tasks exist |
+| [Command-line tools for agents](docs/reference/cli-tools.md) | Which search tools agents use, and how fast they are |
 | [Harness reference](docs/reference/harness.md) | Every hook, agent, permission and managed block, and what triggers it |
 | [Documentation style guide](docs/contributing/documentation-style.md) | How pages are written and the frontmatter contract |
 | [Decision records](docs/decisions/README.md) | The choices made so far, and why |

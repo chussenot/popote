@@ -24,7 +24,8 @@ part exists is in [The agent harness](../agent-harness.md).
 | `.claude/hooks/*.sh` | Claude Code | Hook scripts (POSIX `sh`) |
 | `.agents/skills/beads/` | Codex, Claude Code | Beads skill installed by `bd init` |
 | `.codex/`, `.cursor/` | Codex, Cursor | Beads hooks and rules installed by `bd init` |
-| `.rtk/filters.toml` | rtk | Project output filters (template, none active) |
+| `.rtk/filters.toml` | rtk | Project output filters for `fd`, `yq` and `scc`; active once trusted |
+| `.ripgreprc` | ripgrep | Repository defaults: dot-directories, long-line previews |
 | `.mcp.json` | Claude Code | Project MCP servers: `codegraph` |
 | `.cursor/mcp.json` | Cursor | `codegraph` MCP server |
 | `.codex/config.toml` | Codex | Codex hooks switch and the `codegraph` MCP server |
@@ -35,7 +36,7 @@ part exists is in [The agent harness](../agent-harness.md).
 
 | Event | Matcher | Script | Behaviour |
 | --- | --- | --- | --- |
-| `SessionStart` | all | `.claude/hooks/session-start.sh` | Cloud sessions only: installs mise and the toolchain, builds pact from source if needed, exports tool paths through `CLAUDE_ENV_FILE` (and `MISE_TASK_RUN_AUTO_INSTALL=false` when pact is not mise-managed), installs git hooks, builds the codegraph index if missing. Local sessions: warns if mise is missing. Never fails the session |
+| `SessionStart` | all | `.claude/hooks/session-start.sh` | Cloud sessions only: installs mise and the toolchain, builds pact from source if needed, exports tool paths through `CLAUDE_ENV_FILE` (and `MISE_TASK_RUN_AUTO_INSTALL=false` when pact is not mise-managed), installs git hooks, trusts the project rtk filters, builds the codegraph index if missing. Local sessions: warns if mise is missing. Never fails the session |
 | `SessionStart` | all | `bd prime --hook-json` | Loads the beads workflow and ready work into context |
 | `PreToolUse` | `Bash` | `.claude/hooks/guard-bash.sh` | Denies the commands listed below, with the reason |
 | `PreToolUse` | `Bash` | `.claude/hooks/rtk-rewrite.sh` | Passes the command to `rtk hook claude`, which prefixes supported commands with `rtk`. rtk pre-approves only read-only rewrites (`git status`); anything else (`git push --force`, compound commands) still goes through the permission rules. No-op without rtk |

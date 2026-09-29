@@ -75,6 +75,13 @@ git reset --soft HEAD~1
 
 The second command undoes the test commit.
 
+Then trust the project's rtk filters, which condense the output of `fd`, `yq`
+and `scc` for agents. rtk shows each filter before asking:
+
+```sh
+mise run rtk:trust
+```
+
 ## 4. Run the quality gate
 
 ```sh

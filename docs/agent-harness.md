@@ -127,10 +127,15 @@ diffs) fills the context window and pushes out what the agent needs.
 
 **Part.** rtk rewrites Bash commands so their output arrives condensed. It is
 wired as a project hook, so every clone and cloud session gets it without
-changing the user's global Claude Code settings.
+changing the user's global Claude Code settings. The commands themselves are
+the fastest in their niche: `rg` for content, `fd` for names, `ast-grep` for
+syntax, `jq` and `yq` for data. rtk handles each one natively or through
+`.rtk/filters.toml`. Measurements: [Command-line tools for agents](reference/cli-tools.md).
 
 **Cost.** A condensed result can hide a detail. The instruction block tells
-the agent to re-run with `rtk proxy <cmd>` when output looks wrong.
+the agent to re-run with `rtk proxy <cmd>` when output looks wrong. rtk runs
+the engine the agent named, so the speed of `rg` depends on agents following
+`AGENTS.md` rather than reaching for `grep`.
 
 ## Less code by default
 

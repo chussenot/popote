@@ -26,6 +26,14 @@ Why there is one entry point: [decision 0001](../decisions/0001-mise-is-the-sing
 | beads (`bd`) | `github:gastownhall/beads` | Issue tracker shared by agents and humans; state in `.beads/` |
 | pact | `github:chussenot/pact` | Leases, messages and watches between agents in one checkout; state in `.pact/` |
 | rtk | `rtk` | Condenses command output before it reaches an agent |
+| ripgrep (`rg`) | `ripgrep` | Content search; defaults in `.ripgreprc` |
+| fd | `fd` | File search by name |
+| ast-grep | `ast-grep` | Structural code search and rewrite |
+| jq | `jq` | JSON query |
+| yq | `yq` | YAML, TOML and XML query (mikefarah v4, not the Python `yq`) |
+| sd | `sd` | Search and replace across files |
+| scc | `aqua:boyter/scc` | Code size and complexity by language |
+| hyperfine | `hyperfine` | Command benchmarking |
 | Node.js LTS | `node` | Runtime for codegraph and the ponytail plugin hooks; not used for repository scripts |
 | codegraph | `npm:@colbymchenry/codegraph` | Local code knowledge graph served to agents over MCP; index in `.codegraph/` |
 
@@ -46,6 +54,8 @@ cargo install --git https://github.com/chussenot/pact --locked --root "$HOME/.lo
 
 The cloud session-start hook runs this fallback automatically.
 
+Why these search tools, and how they perform: [Command-line tools for agents](cli-tools.md).
+
 ## Tasks
 
 Run a task with `mise run <task>`; `mise tasks` lists them.
@@ -63,6 +73,9 @@ Run a task with `mise run <task>`; `mise tasks` lists them.
 | `changelog` | `cog changelog` | Print the changelog since the last tag |
 | `release` | `cog bump --auto` | Bump the version from commit history, tag, update `CHANGELOG.md` |
 | `graph` | `codegraph init --yes`, or `codegraph sync` when an index exists | Build or refresh the local code index |
+| `rtk:trust` | `rtk trust` | Review and trust `.rtk/filters.toml` on this machine |
+| `rtk:verify` | `rtk verify` | Run the inline tests of the rtk filters |
+| `bench` | `scripts/bench-search.sh` | Compare `rg`/`fd` with `grep`/`find` on a directory |
 | `bd:ready` | `bd ready` | List issues with no open blockers |
 | `pact:doctor` | `pact doctor` | Check the coordination protocol is current and committed |
 
@@ -72,6 +85,10 @@ Run a task with `mise run <task>`; `mise tasks` lists them.
 statistics from this repository. To opt in, set it to `1` in
 `mise.local.toml`. What it would send is listed in the upstream
 [TELEMETRY.md](https://github.com/colbymchenry/codegraph/blob/main/TELEMETRY.md).
+
+`mise.toml` also sets `RIPGREP_CONFIG_PATH` to `.ripgreprc`, so ripgrep
+searches dot-directories by default; see
+[the ripgrep defaults](cli-tools.md#ripgrep-ripgreprc).
 
 mise loads `.env` from the repository root when it exists. `.env` is
 gitignored and the Bash guard refuses to commit it. Personal overrides
