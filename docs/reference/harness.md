@@ -107,7 +107,9 @@ these files. Four edits were made afterwards:
   CodeGraph block already in `AGENTS.md`.
 
 Re-running the installer or `codegraph upgrade` can undo these; check
-`git diff` afterwards.
+`git diff` afterwards. To upgrade, change the pinned version in `mise.toml`
+rather than running `codegraph upgrade`, then run `mise install` and
+`codegraph install --refresh`, and review the diff.
 
 ## Plugins
 
